@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
         qCritical().noquote() << "Nothing was selected!";
         return 1; //nothing to do
     }
-    qInfo().noquote() << "Pool size:" << possibleMaps.size();
+    qInfo().noquote() << "Map Pool size:" << possibleMaps.size();
     int numRandomMaps = 0;
     if (settings.Get_Get_Next_Map_Instead_Of_Random()) { //get next maps
         //Get the starting position
