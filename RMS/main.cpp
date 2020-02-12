@@ -85,7 +85,10 @@ int main(int argc, char *argv[]) {
     }
 
     //Get Random Maps
-    if (possibleMaps.isEmpty()) return 0; //nothing to do
+    if (possibleMaps.isEmpty()) {
+        qCritical().noquote() << "Nothing was selected!";
+        return 1; //nothing to do
+    }
     int numRandomMaps = 0;
     if (settings.Get_Get_Next_Map_Instead_Of_Random()) { //get next maps
         //Get the starting position
@@ -123,10 +126,7 @@ int main(int argc, char *argv[]) {
             int index = Random::Get_Instance().Get_Num(0, possibleMaps.size()-1);
             QString filePath = possibleMaps.at(index);
             possibleMaps.removeAt(index);
-            if (Copy_Map_Into_Output_Folder(filePath, outputFolder)) {
-                ++numRandomMaps;
-                settings.Set_Last_Path_For_Get_Next_Map(filePath);
-            }
+            if (Copy_Map_Into_Output_Folder(filePath, outputFolder)) ++numRandomMaps;
         }
     }
     if (numRandomMaps > 0) {

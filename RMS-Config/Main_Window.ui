@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>433</width>
-    <height>380</height>
+    <height>412</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -111,6 +111,27 @@
       <string>Get Next Map Instead of Random</string>
      </property>
     </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="layoutLastMapPath">
+     <item>
+      <widget class="QLabel" name="lblLastMapPath">
+       <property name="text">
+        <string>Last Map Path:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="leLastMapPath"/>
+     </item>
+     <item>
+      <widget class="QToolButton" name="btnLastMapPath">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QCheckBox" name="cbCheckPlayerCount">

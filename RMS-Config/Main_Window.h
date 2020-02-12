@@ -28,10 +28,15 @@ private slots:
     void on_cbCheckPlayerCount_toggled(bool checked);
     void on_Main_Window_finished();
 
+    void on_btnLastMapPath_clicked();
+
+    void on_cbGetNextMapInsteadOfRandom_toggled(bool checked);
+
 private:
     bool Save();
     bool Load();
     void Enable_Player_Number_Check(bool enabled);
+    void Enable_Last_Map_Path(bool enabled);
     QString Get_Starting_Folder();
     void Show_Save_Failed_Message();
 

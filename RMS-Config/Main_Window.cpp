@@ -98,6 +98,7 @@ bool Main_Window::Save() {
     }
     this->settingsManager->Set_Directories(directories);
     this->settingsManager->Set_Output_Folder(this->ui->leOutputFolder->text());
+    this->settingsManager->Set_Last_Path_For_Get_Next_Map(this->ui->leLastMapPath->text());
     this->settingsManager->Set_Get_Next_Map_Instead_Of_Random(this->ui->cbGetNextMapInsteadOfRandom->isChecked());
     this->settingsManager->Set_Check_Player_Count(this->ui->cbCheckPlayerCount->isChecked());
     this->settingsManager->Set_Number_Of_Random_Maps(this->ui->sbNumberOfRandomMaps->value());
@@ -114,11 +115,13 @@ bool Main_Window::Load() {
         if (!directory.isEmpty()) this->ui->listFoldersToScan->addItem(directory);
     }
     this->ui->leOutputFolder->setText(this->settingsManager->Get_Output_Folder());
+    this->ui->leLastMapPath->setText(this->settingsManager->Get_Last_Path_For_Get_Next_Map());
     this->ui->cbGetNextMapInsteadOfRandom->setChecked(this->settingsManager->Get_Get_Next_Map_Instead_Of_Random());
     this->ui->cbCheckPlayerCount->setChecked(this->settingsManager->Get_Check_Player_Count());
     this->ui->sbNumberOfRandomMaps->setValue(this->settingsManager->Get_Number_Of_Random_Maps());
     this->ui->sbMinNumberOfPlayers->setValue(this->settingsManager->Get_Min_Number_Of_Players());
     this->ui->sbMaxNumberOfPlayers->setValue(this->settingsManager->Get_Max_Number_Of_Players());
+    this->Enable_Last_Map_Path(this->settingsManager->Get_Get_Next_Map_Instead_Of_Random());
     this->Enable_Player_Number_Check(this->settingsManager->Get_Check_Player_Count());
     return true;
 }
@@ -128,6 +131,12 @@ void Main_Window::Enable_Player_Number_Check(bool enabled) {
     this->ui->sbMinNumberOfPlayers->setEnabled(enabled);
     this->ui->lblMaxNumberOfPlayers->setEnabled(enabled);
     this->ui->sbMaxNumberOfPlayers->setEnabled(enabled);
+}
+
+void Main_Window::Enable_Last_Map_Path(bool enabled) {
+    this->ui->lblLastMapPath->setEnabled(enabled);
+    this->ui->leLastMapPath->setEnabled(enabled);
+    this->ui->btnLastMapPath->setEnabled(enabled);
 }
 
 QString Main_Window::Get_Starting_Folder() {
@@ -172,4 +181,19 @@ void Main_Window::on_cbCheckPlayerCount_toggled(bool checked) {
 
 void Main_Window::on_Main_Window_finished() {
     if (this->saveSettingsOnClose) this->Save();
+}
+
+void Main_Window::on_btnLastMapPath_clicked() {
+    QString startingFolder = QFileInfo(this->ui->leLastMapPath->text()).path();
+    if (startingFolder.isEmpty()) startingFolder = this->Get_Starting_Folder();
+
+    //Open the folder
+    QString file = QFileDialog::getOpenFileName(this, "Select a map", startingFolder, "StarCraft Maps (*.scm *.scx)");
+    if (!file.isEmpty() && this->ui->listFoldersToScan->findItems(file, Qt::MatchExactly).isEmpty()) {
+        this->ui->leLastMapPath->setText(file);
+    }
+}
+
+void Main_Window::on_cbGetNextMapInsteadOfRandom_toggled(bool checked) {
+    this->Enable_Last_Map_Path(checked);
 }
