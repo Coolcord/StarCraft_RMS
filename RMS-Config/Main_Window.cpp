@@ -73,6 +73,7 @@ void Main_Window::on_btnSaveAndRun_clicked() {
     }
     if (noErrors) QMessageBox::information(this, STRING_WINDOW_TITLE_SHORT, "Random maps selected!", QMessageBox::Ok);
     else QMessageBox::critical(this, STRING_WINDOW_TITLE_SHORT, "Failed to select maps!", QMessageBox::Ok);
+    this->Load();
     this->instanceRunning = false;
 }
 

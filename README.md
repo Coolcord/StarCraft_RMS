@@ -1,4 +1,4 @@
-StarCraft_RMS
+StarCraft RMS
 =============
 
 Random Map Selector for StarCraft 1

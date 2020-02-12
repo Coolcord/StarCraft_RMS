@@ -11,25 +11,6 @@
 #include <QTime>
 #include <assert.h>
 
-QString Read_Spot(const QString &outputFolder) {
-    QFile file(outputFolder+"/RMS_spot.cfg");
-    if (!file.open(QIODevice::ReadOnly)) return QString();
-    QTextStream stream(&file);
-    QString filePath = stream.readLine();
-    file.close();
-    return filePath;
-}
-
-bool Write_Spot(const QString &outputFolder, const QString &filePath) {
-    QFile file(outputFolder+"/RMS_spot.cfg");
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Truncate)) return false;
-    QTextStream stream(&file);
-    stream << filePath << endl;
-    stream.flush();
-    file.close();
-    return true;
-}
-
 bool Copy_Map_Into_Output_Folder(const QString &inputFilePath, const QString &outputFolder) {
     QFile inputFile(inputFilePath);
     int fileSize = inputFile.size();
@@ -51,10 +32,6 @@ bool Copy_Map_Into_Output_Folder(const QString &inputFilePath, const QString &ou
     inputFile.close();
     outputFile.close();
     qInfo().noquote() << fileName;
-    if (!Write_Spot(outputFolder, inputFilePath)) {
-        qCritical().noquote() << "Unable to write spot!";
-        return true; //copy succeeded, but spot write didn't. Just treat this as a warning
-    }
     return true;
 }
 
@@ -113,27 +90,32 @@ int main(int argc, char *argv[]) {
     if (settings.Get_Get_Next_Map_Instead_Of_Random()) { //get next maps
         //Get the starting position
         int currentIndex = 0;
-        QString lastFile = Read_Spot(outputFolder);
+        QString lastFile = settings.Get_Last_Path_For_Get_Next_Map();
         if (!lastFile.isEmpty()) {
             currentIndex = -1;
             int index = 0;
-            for (QStringList::iterator iter = possibleMaps.begin(); iter != possibleMaps.end() && currentIndex != -1; ++iter, ++index) {
-                if (*iter == lastFile) currentIndex = index;
+            for (QStringList::iterator iter = possibleMaps.begin(); iter != possibleMaps.end(); ++iter, ++index) {
+                if (*iter == lastFile) {
+                    currentIndex = index+1;
+                    if (currentIndex > possibleMaps.size()) currentIndex = 0;
+                    break;
+                }
             }
             if (currentIndex == -1) currentIndex = 0; //not found, so just restart
         }
 
         //Copy the maps in order
         int startingIndex = currentIndex;
-        bool seenStart = false;
         assert(currentIndex >= 0);
         while (numRandomMaps < settings.Get_Number_Of_Random_Maps()) {
             QString filePath = possibleMaps.at(currentIndex);
-            if (Copy_Map_Into_Output_Folder(filePath, outputFolder)) ++numRandomMaps;
+            if (Copy_Map_Into_Output_Folder(filePath, outputFolder)) {
+                ++numRandomMaps;
+                settings.Set_Last_Path_For_Get_Next_Map(filePath);
+            }
             ++currentIndex;
             if (currentIndex > possibleMaps.size()) currentIndex = 0;
-            if (seenStart) break; //don't wrap around more than once
-            if (currentIndex == startingIndex) seenStart = true;
+            if (currentIndex == startingIndex) break; //don't wrap around more than once
         }
     } else { //get random maps
         while (numRandomMaps < settings.Get_Number_Of_Random_Maps() && !possibleMaps.isEmpty()) {
@@ -141,10 +123,14 @@ int main(int argc, char *argv[]) {
             int index = Random::Get_Instance().Get_Num(0, possibleMaps.size()-1);
             QString filePath = possibleMaps.at(index);
             possibleMaps.removeAt(index);
-            if (Copy_Map_Into_Output_Folder(filePath, outputFolder)) ++numRandomMaps;
+            if (Copy_Map_Into_Output_Folder(filePath, outputFolder)) {
+                ++numRandomMaps;
+                settings.Set_Last_Path_For_Get_Next_Map(filePath);
+            }
         }
     }
     if (numRandomMaps > 0) {
+        settings.Save();
         return 0;
     } else {
         qCritical().noquote() << "Nothing was selected!";

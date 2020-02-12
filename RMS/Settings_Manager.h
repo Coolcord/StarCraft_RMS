@@ -16,6 +16,7 @@ public:
 
     QStringList Get_Directories();
     QString Get_Output_Folder();
+    QString Get_Last_Path_For_Get_Next_Map();
     bool Get_Get_Next_Map_Instead_Of_Random();
     bool Get_Check_Player_Count();
     int Get_Number_Of_Random_Maps();
@@ -24,6 +25,7 @@ public:
 
     void Set_Directories(const QStringList &directories);
     void Set_Output_Folder(const QString &outputFolder);
+    void Set_Last_Path_For_Get_Next_Map(const QString &lastPathForGetNextMap);
     void Set_Get_Next_Map_Instead_Of_Random(bool getNextMapInsteadOfRandom);
     void Set_Check_Player_Count(bool checkPlayerCount);
     void Set_Number_Of_Random_Maps(int numberOfRandomMaps);
@@ -36,6 +38,7 @@ private:
     QString configFileLocation;
     QStringList directories;
     QString outputFolder;
+    QString lastPathForGetNextMap;
     bool getNextMapInsteadOfRandom;
     bool checkPlayerCount;
     int numberOfRandomMaps;

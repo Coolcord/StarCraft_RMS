@@ -24,6 +24,7 @@ bool Settings_Manager::Save() {
 
     if (!this->configFile->Set_Value("Directories", directoryList)) return false;
     if (!this->configFile->Set_Value("Output_Folder", this->outputFolder)) return false;
+    if (!this->configFile->Set_Value("Last_Path_For_Get_Next_Map", this->lastPathForGetNextMap)) return false;
     if (!this->configFile->Set_Value("Get_Next_Map_Instead_Of_Random", this->getNextMapInsteadOfRandom)) return false;
     if (!this->configFile->Set_Value("Check_Player_Count", this->checkPlayerCount)) return false;
     if (!this->configFile->Set_Value("Number_Of_Random_Maps", this->numberOfRandomMaps)) return false;
@@ -38,6 +39,7 @@ bool Settings_Manager::Load() {
     QString directoryList;
     this->configFile->Get_Value("Directories", directoryList);
     this->configFile->Get_Value("Output_Folder", this->outputFolder);
+    this->configFile->Get_Value("Last_Path_For_Get_Next_Map", this->lastPathForGetNextMap);
     this->configFile->Get_Value("Get_Next_Map_Instead_Of_Random", this->getNextMapInsteadOfRandom);
     this->configFile->Get_Value("Check_Player_Count", this->checkPlayerCount);
     this->configFile->Get_Value("Number_Of_Random_Maps", this->numberOfRandomMaps);
@@ -50,6 +52,7 @@ bool Settings_Manager::Load() {
 void Settings_Manager::Load_Defaults() {
     this->directories = QStringList();
     this->outputFolder = QString();
+    this->lastPathForGetNextMap = QString();
     this->getNextMapInsteadOfRandom = false;
     this->checkPlayerCount = true;
     this->numberOfRandomMaps = 0;
@@ -63,6 +66,10 @@ QStringList Settings_Manager::Get_Directories() {
 
 QString Settings_Manager::Get_Output_Folder() {
     return this->outputFolder;
+}
+
+QString Settings_Manager::Get_Last_Path_For_Get_Next_Map() {
+    return this->lastPathForGetNextMap;
 }
 
 bool Settings_Manager::Get_Get_Next_Map_Instead_Of_Random() {
@@ -91,6 +98,10 @@ void Settings_Manager::Set_Directories(const QStringList &directories) {
 
 void Settings_Manager::Set_Output_Folder(const QString &outputFolder) {
     this->outputFolder = outputFolder;
+}
+
+void Settings_Manager::Set_Last_Path_For_Get_Next_Map(const QString &lastPathForGetNextMap) {
+    this->lastPathForGetNextMap = lastPathForGetNextMap;
 }
 
 void Settings_Manager::Set_Get_Next_Map_Instead_Of_Random(bool getNextMapInsteadOfRandom) {
