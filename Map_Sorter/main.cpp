@@ -69,7 +69,8 @@ bool Is_File_Name_A_Number(QString fileName) {
     bool isNumber = false;
     fileName = fileName.toLower();
     QString(fileName.at(0)).toInt(&isNumber);
-    if (!isNumber && fileName.at(0).toLatin1() == '(' && fileName.size() > 1) {
+    if (isNumber) return true;
+    if (fileName.at(0).toLatin1() == '(' && fileName.size() > 1) {
         QString(fileName.at(1)).toInt(&isNumber);
     } else {
         isNumber = false;
