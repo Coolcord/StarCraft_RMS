@@ -164,11 +164,9 @@ bool Downloader::Get_Next_Page() {
 
 QString Downloader::Fix_File_Name(QString fileName, int numPlayers, const QString &fileType) {
     //Remove whitespace at the beginning of the file name
-    while (fileName.startsWith(" ")) {
-        fileName.remove(0, 1);
-    }
+    while (fileName.startsWith(" ")) fileName.remove(0, 1);
 
-    //Add the player count
+    //Remove the old player count
     if (fileName.size() > 3 && numPlayers > 0) {
         if (fileName.startsWith("(") && fileName.at(2) == ")") {
             bool valid = false;
@@ -177,14 +175,13 @@ QString Downloader::Fix_File_Name(QString fileName, int numPlayers, const QStrin
         }
     }
 
-    //Remove whitespace at the beginning of the file name
-    while (fileName.startsWith(" ")) {
-        fileName.remove(0, 1);
-    }
+    //Remove whitespace at the beginning of the file name again
+    while (fileName.startsWith(" ")) fileName.remove(0, 1);
 
     //Fix the file extension
     QString fileNameLower = fileName.toLower();
     if (fileNameLower.endsWith(".scx") || fileNameLower.endsWith(".scm")) fileName.chop(4);
-    fileName = this->htmlStringHelper->Convert_From_HTML_Name("("+QString::number(numPlayers)+")"+fileName+"."+fileType);
+    if (numPlayers > 0) fileName = this->htmlStringHelper->Convert_From_HTML_Name("("+QString::number(numPlayers)+")"+fileName+"."+fileType);
+    else fileName = this->htmlStringHelper->Convert_From_HTML_Name(fileName+"."+fileType);
     return fileName;
 }
