@@ -144,9 +144,8 @@ int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
 
     //Show help
-    if (argc != 3) {
-        qInfo().noquote() << argv[0] << "<directoryToSort>" << "<useLettersFirst>";
-        qInfo().noquote() << "<useLettersFirst> must be either true or false";
+    if (argc != 2) {
+        qInfo().noquote() << argv[0] << "<directoryToSort>";
         return 0;
     }
 
@@ -158,19 +157,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    //Parse Use Letters
-    bool useLetters = false;
-    QString useLettersFirst = argv[2];
-    useLettersFirst = useLettersFirst.toLower();
-    if (useLettersFirst == "true") {
-        useLetters = true;
-    } else if (useLettersFirst == "false") {
-        useLetters = false;
-    } else {
-        qCritical().noquote() << "<useLettersFirst> must be either true or false!";
-        return 1;
-    }
-
     //Flatten the directory
     qInfo() << "Flattening directory...";
     if (!Flatten_Directory(sortDirectory)) {
@@ -178,7 +164,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    if (useLetters) {
+    //Sort by pages with letters or just pages
+    if (QDir(sortDirectory).count() > 200*99) {
         if (!Sort_Folder_By_Letters(sortDirectory)) qCritical().noquote() << "Sorting failed!";
     } else {
         qInfo() << "Sorting pages...";
