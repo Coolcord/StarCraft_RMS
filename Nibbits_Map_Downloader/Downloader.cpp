@@ -96,8 +96,17 @@ void Downloader::Read_Download_Links() {
 
 void Downloader::Map_Download_Finished() {
     QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
-    if (!reply) return;
-    if (reply->error() != QNetworkReply::NoError) return;
+    if (!reply || reply->error() != QNetworkReply::NoError) {
+        qCritical().nospace() << "Failed to download " << this->downloadLinks->front().fileName << "!";
+        qCritical() << "Skipping and moving on to the next map...";
+        this->downloadLinks->pop_front();
+        if (!this->downloadLinks->isEmpty()) {
+            this->Process_Next_Download_Link();
+        } else {
+            if (this->Get_Next_Page()) this->Download_Maps();
+        }
+        return;
+    }
     QString locationRedirect = reply->header(QNetworkRequest::LocationHeader).toString();
     if (!locationRedirect.isEmpty()) {
         qInfo().noquote() << locationRedirect;
