@@ -7,6 +7,7 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QAuthenticator>
 #include <QtNetwork/QNetworkProxy>
+#include <QQueue>
 
 class HTML_String_Helper;
 
@@ -31,6 +32,7 @@ private slots:
 private:
     void Process_Next_Download_Link();
     bool Get_Next_Page();
+    QString Fix_File_Name(QString fileName, int numPlayers, const QString &fileType);
 
     QObject *parent;
     HTML_String_Helper *htmlStringHelper;
@@ -39,6 +41,8 @@ private:
     QString downloadFolder;
     QStringList downloadLinks;
     QStringList fileNames;
+    QStringList fileTypes;
+    QQueue<int> numPlayers;
     QNetworkAccessManager *manager;
 };
 

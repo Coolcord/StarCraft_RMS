@@ -11,11 +11,28 @@ HTML_String_Helper::~HTML_String_Helper() {
 }
 
 QString HTML_String_Helper::Convert_From_HTML_Name(const QString &string) {
-    QString fixedString;
+    QString fixedString, code;
+    int tmp = 0;
     for (int i = 0; i < string.size(); ++i) {
-        if (string.at(i).toLatin1() == '&') {
-            int tmp = i;
-            QString code;
+        switch (string.at(i).toLatin1()) {
+        default:
+            fixedString += string.at(i);
+            break;
+        case '/':
+            fixedString += " ";
+            break;
+        case 0x00:
+        case '*':
+        case '?':
+        case '\"':
+        case '<':
+        case '>':
+        case '|':
+        case '\\':
+            break; //do nothing
+        case '&': //convert HTML code
+            tmp = i;
+            code = QString();
             while (i < string.size()) {
                 code += string.at(i);
                 if (string.at(i).toLatin1() == ';') break;
@@ -27,8 +44,7 @@ QString HTML_String_Helper::Convert_From_HTML_Name(const QString &string) {
                 i = tmp;
                 fixedString += string.at(i);
             }
-        } else {
-            fixedString += string.at(i);
+            break;
         }
     }
     return fixedString;

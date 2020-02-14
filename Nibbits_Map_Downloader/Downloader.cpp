@@ -53,7 +53,10 @@ void Downloader::Read_Download_Links() {
             bool valid = false;
             int tmp = 0;
             tmp = line.split("<span class=\"players\">(").last().split(")").first().toInt(&valid);
-            if (valid) lastMaxPlayers = tmp;
+            if (valid) {
+                lastMaxPlayers = tmp;
+                this->numPlayers.append(lastMaxPlayers);
+            }
         }
 
         //Read Download Link
@@ -70,30 +73,13 @@ void Downloader::Read_Download_Links() {
         //Read File Type
         if (line.contains("class=\"filetype-")) {
             lastFileType = line.split("class=\"filetype-").at(1).split("\"").first().toLower();
+            this->fileTypes.append(lastFileType);
         }
 
         //Read File Name
         if (line.contains("title=\"Download ")) {
             QString fileName = line.split("title=\"Download ").at(1).split("\">").first();
-
-            //Add the player count
-            if (fileName.size() > 3) {
-                if (fileName.startsWith("(") && fileName.at(2) == ")") {
-                    bool valid = false;
-                    QString(fileName.at(1)).toInt(&valid);
-                    if (valid) fileName.remove(0, 3);
-                }
-            }
-
-            //Remove whitespace at the beginning of the file name
-            while (fileName.startsWith(" ")) {
-                fileName.remove(0, 1);
-            }
-
-            //Fix the file extension
-            QString fileNameLower = fileName.toLower();
-            if (fileNameLower.endsWith(".scx") || fileNameLower.endsWith(".scm")) fileName.chop(4);
-            fileName = this->htmlStringHelper->Convert_From_HTML_Name("("+QString::number(lastMaxPlayers)+")"+fileName+"."+lastFileType);
+            fileName = this->Fix_File_Name(fileName, lastMaxPlayers, lastFileType);
             this->fileNames.append(fileName);
         }
     }
@@ -113,6 +99,11 @@ void Downloader::Map_Download_Finished() {
     QString locationRedirect = reply->header(QNetworkRequest::LocationHeader).toString();
     if (!locationRedirect.isEmpty()) {
         qInfo().noquote() << locationRedirect;
+        QString locationRedirectLower = locationRedirect.toLower();
+        if (locationRedirectLower.endsWith(".scm") || locationRedirectLower.endsWith(".scx")) {
+            this->fileNames[0] = this->Fix_File_Name(locationRedirect.split("/").last(), this->numPlayers.front(), this->fileTypes.front()); //update the file name
+        }
+        qInfo() << "Downloading" << this->fileNames.front();
         QNetworkReply *reply = this->manager->get(QNetworkRequest(QUrl(locationRedirect)));
         connect(reply, &QNetworkReply::finished, this, &Downloader::Map_Download_Finished);
         return;
@@ -130,6 +121,8 @@ void Downloader::Map_Download_Finished() {
 
     this->downloadLinks.removeFirst();
     this->fileNames.pop_front();
+    this->fileTypes.pop_front();
+    this->numPlayers.pop_front();
     if (!this->downloadLinks.isEmpty()) {
         this->Process_Next_Download_Link();
     } else {
@@ -149,18 +142,21 @@ void Downloader::SSL_Errors(QNetworkReply *reply, const QList<QSslError> &errors
 }
 
 void Downloader::Process_Next_Download_Link() {
-    if (this->downloadLinks.size() != this->fileNames.size()) {
+    if (this->downloadLinks.size() != this->fileNames.size()
+            && this->downloadLinks.size() != this->fileTypes.size()
+            && this->downloadLinks.size() != this->numPlayers.size()) {
         qCritical() << "Some download links did not read as expected on the following page:";
         qCritical() << this->currentPageURL;
         qCritical() << "";
         qCritical() << "Aborting downloads!";
         this->downloadLinks.clear();
         this->fileNames.clear();
+        this->fileTypes.clear();
+        this->numPlayers.clear();
         return;
     }
     assert(!this->downloadLinks.isEmpty() && !this->fileNames.isEmpty());
     qInfo() << "";
-    qInfo().nospace() << "Downloading " << this->fileNames.front();
     qInfo().noquote() << this->downloadLinks.front();
 
     QNetworkReply *reply = this->manager->get(QNetworkRequest(QUrl(this->downloadLinks.front())));
@@ -174,4 +170,26 @@ bool Downloader::Get_Next_Page() {
     this->currentPageURL.remove("&p="+QString::number(page));
     this->currentPageURL += "&p="+QString::number(page+1);
     return true;
+}
+
+QString Downloader::Fix_File_Name(QString fileName, int numPlayers, const QString &fileType) {
+    //Add the player count
+    if (fileName.size() > 3) {
+        if (fileName.startsWith("(") && fileName.at(2) == ")") {
+            bool valid = false;
+            QString(fileName.at(1)).toInt(&valid);
+            if (valid) fileName.remove(0, 3);
+        }
+    }
+
+    //Remove whitespace at the beginning of the file name
+    while (fileName.startsWith(" ")) {
+        fileName.remove(0, 1);
+    }
+
+    //Fix the file extension
+    QString fileNameLower = fileName.toLower();
+    if (fileNameLower.endsWith(".scx") || fileNameLower.endsWith(".scm")) fileName.chop(4);
+    fileName = this->htmlStringHelper->Convert_From_HTML_Name("("+QString::number(numPlayers)+")"+fileName+"."+fileType);
+    return fileName;
 }
