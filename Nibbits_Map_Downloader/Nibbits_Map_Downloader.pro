@@ -26,5 +26,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    Download_Link_Data.h \
     Downloader.h \
     HTML_String_Helper.h

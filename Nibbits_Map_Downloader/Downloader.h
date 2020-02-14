@@ -8,6 +8,7 @@
 #include <QtNetwork/QAuthenticator>
 #include <QtNetwork/QNetworkProxy>
 #include <QQueue>
+#include "Download_Link_Data.h"
 
 class HTML_String_Helper;
 
@@ -39,10 +40,7 @@ private:
     QString startingPageURL;
     QString currentPageURL;
     QString downloadFolder;
-    QStringList downloadLinks;
-    QStringList fileNames;
-    QStringList fileTypes;
-    QQueue<int> numPlayers;
+    QQueue<Download_Link_Data> *downloadLinks;
     QNetworkAccessManager *manager;
 };
 

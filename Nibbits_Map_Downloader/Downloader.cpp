@@ -10,8 +10,7 @@ Downloader::Downloader(QObject *parent, const QString &startingURL, const QStrin
     this->startingPageURL = startingURL;
     this->currentPageURL = startingURL;
     this->downloadFolder = downloadFolder;
-    this->downloadLinks = QStringList();
-    this->fileNames = QStringList();
+    this->downloadLinks = new QQueue<Download_Link_Data>();
     this->htmlStringHelper = new HTML_String_Helper();
     this->manager = new QNetworkAccessManager(parent);
     connect(this->manager, &QNetworkAccessManager::networkAccessibleChanged, this, &Downloader::Network_Accessible_Changed);
@@ -19,6 +18,7 @@ Downloader::Downloader(QObject *parent, const QString &startingURL, const QStrin
 }
 
 Downloader::~Downloader() {
+    delete this->downloadLinks;
     delete this->htmlStringHelper;
     delete this->manager;
     this->manager = nullptr;
@@ -44,8 +44,11 @@ void Downloader::Read_Download_Links() {
     if (reply->error() != QNetworkReply::NoError) return;
     QByteArray data = reply->readAll();
     QTextStream stream(&data);
-    int lastMaxPlayers = 0;
-    QString lastFileType = "scx";
+    Download_Link_Data downloadLinkData;
+    downloadLinkData.numPlayers = 0;
+    downloadLinkData.fileName = QString();
+    downloadLinkData.fileType = QString();
+    downloadLinkData.downloadLink = QString();
     while (!stream.atEnd()) {
         //Read Max Players
         QString line = stream.readLine();
@@ -53,10 +56,18 @@ void Downloader::Read_Download_Links() {
             bool valid = false;
             int tmp = 0;
             tmp = line.split("<span class=\"players\">(").last().split(")").first().toInt(&valid);
-            if (valid) {
-                lastMaxPlayers = tmp;
-                this->numPlayers.append(lastMaxPlayers);
-            }
+            if (valid) downloadLinkData.numPlayers = tmp;
+        }
+
+        //Read File Type
+        if (line.contains("class=\"filetype-")) {
+            downloadLinkData.fileType = line.split("class=\"filetype-").at(1).split("\"").first().toLower();
+        }
+
+        //Read File Name
+        if (line.contains("title=\"Download ")) {
+            QString fileName = line.split("title=\"Download ").at(1).split("\">").first();
+            downloadLinkData.fileName = this->Fix_File_Name(fileName, downloadLinkData.numPlayers, downloadLinkData.fileType);
         }
 
         //Read Download Link
@@ -64,27 +75,18 @@ void Downloader::Read_Download_Links() {
             QStringList strings = line.split("<a href=\"nibbler://sc.nibbits.com");
             for (QString string : strings) {
                 if (string.startsWith("/maps/get")) {
-                    QString downloadURL = STRING_BASE_URL+string.split("\"").first();
-                    this->downloadLinks.append(downloadURL);
+                    downloadLinkData.downloadLink = STRING_BASE_URL+string.split("\"").first();
+                    this->downloadLinks->append(downloadLinkData);
+                    downloadLinkData.numPlayers = 0;
+                    downloadLinkData.fileName = QString();
+                    downloadLinkData.fileType = QString();
+                    downloadLinkData.downloadLink = QString();
                 }
             }
         }
-
-        //Read File Type
-        if (line.contains("class=\"filetype-")) {
-            lastFileType = line.split("class=\"filetype-").at(1).split("\"").first().toLower();
-            this->fileTypes.append(lastFileType);
-        }
-
-        //Read File Name
-        if (line.contains("title=\"Download ")) {
-            QString fileName = line.split("title=\"Download ").at(1).split("\">").first();
-            fileName = this->Fix_File_Name(fileName, lastMaxPlayers, lastFileType);
-            this->fileNames.append(fileName);
-        }
     }
 
-    if (!this->downloadLinks.isEmpty()) {
+    if (!this->downloadLinks->isEmpty()) {
         this->Process_Next_Download_Link();
     } else {
         qInfo() << "";
@@ -101,29 +103,26 @@ void Downloader::Map_Download_Finished() {
         qInfo().noquote() << locationRedirect;
         QString locationRedirectLower = locationRedirect.toLower();
         if (locationRedirectLower.endsWith(".scm") || locationRedirectLower.endsWith(".scx")) {
-            this->fileNames[0] = this->Fix_File_Name(locationRedirect.split("/").last(), this->numPlayers.front(), this->fileTypes.front()); //update the file name
+            this->downloadLinks->front().fileName = this->Fix_File_Name(locationRedirect.split("/").last(), this->downloadLinks->front().numPlayers, this->downloadLinks->front().fileType); //update the file name
         }
-        qInfo() << "Downloading" << this->fileNames.front();
+        qInfo() << "Downloading" << this->downloadLinks->front().fileName;
         QNetworkReply *reply = this->manager->get(QNetworkRequest(QUrl(locationRedirect)));
         connect(reply, &QNetworkReply::finished, this, &Downloader::Map_Download_Finished);
         return;
     }
 
     QByteArray data = reply->readAll();
-    QFile file(this->downloadFolder+"/"+this->fileNames.front());
+    QFile file(this->downloadFolder+"/"+this->downloadLinks->front().fileName);
     if (!file.open(QIODevice::ReadWrite | QIODevice::Truncate) || file.write(data) != data.size()) {
         file.close();
         file.remove();
-        qCritical() << "Unable to write" << this->fileNames.front() << "!";
+        qCritical() << "Unable to write" << this->downloadLinks->front().fileName << "!";
         return;
     }
     file.close();
 
-    this->downloadLinks.removeFirst();
-    this->fileNames.pop_front();
-    this->fileTypes.pop_front();
-    this->numPlayers.pop_front();
-    if (!this->downloadLinks.isEmpty()) {
+    this->downloadLinks->pop_front();
+    if (!this->downloadLinks->isEmpty()) {
         this->Process_Next_Download_Link();
     } else {
         if (this->Get_Next_Page()) this->Download_Maps();
@@ -142,24 +141,11 @@ void Downloader::SSL_Errors(QNetworkReply *reply, const QList<QSslError> &errors
 }
 
 void Downloader::Process_Next_Download_Link() {
-    if (this->downloadLinks.size() != this->fileNames.size()
-            && this->downloadLinks.size() != this->fileTypes.size()
-            && this->downloadLinks.size() != this->numPlayers.size()) {
-        qCritical() << "Some download links did not read as expected on the following page:";
-        qCritical() << this->currentPageURL;
-        qCritical() << "";
-        qCritical() << "Aborting downloads!";
-        this->downloadLinks.clear();
-        this->fileNames.clear();
-        this->fileTypes.clear();
-        this->numPlayers.clear();
-        return;
-    }
-    assert(!this->downloadLinks.isEmpty() && !this->fileNames.isEmpty());
+    assert(!this->downloadLinks->isEmpty());
     qInfo() << "";
-    qInfo().noquote() << this->downloadLinks.front();
+    qInfo().noquote() << this->downloadLinks->front().downloadLink;
 
-    QNetworkReply *reply = this->manager->get(QNetworkRequest(QUrl(this->downloadLinks.front())));
+    QNetworkReply *reply = this->manager->get(QNetworkRequest(QUrl(this->downloadLinks->front().downloadLink)));
     connect(reply, &QNetworkReply::finished, this, &Downloader::Map_Download_Finished);
 }
 
@@ -174,7 +160,7 @@ bool Downloader::Get_Next_Page() {
 
 QString Downloader::Fix_File_Name(QString fileName, int numPlayers, const QString &fileType) {
     //Add the player count
-    if (fileName.size() > 3) {
+    if (fileName.size() > 3 && numPlayers > 0) {
         if (fileName.startsWith("(") && fileName.at(2) == ")") {
             bool valid = false;
             QString(fileName.at(1)).toInt(&valid);
