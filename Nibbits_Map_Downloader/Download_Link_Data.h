@@ -7,6 +7,7 @@ struct Download_Link_Data {
     QString downloadLink;
     QString fileName;
     QString fileType;
+    bool validForMeleeMode;
     int numPlayers;
 };
 

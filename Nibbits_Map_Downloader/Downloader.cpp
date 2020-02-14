@@ -4,6 +4,7 @@
 #include <QTextStream>
 
 const static QString STRING_BASE_URL = "http://sc.nibbits.com";
+const static bool MELEE_CATEGORY_FILTER = false; //only downloads maps with the "strategy" category, "arena" category, or no categories at all
 
 Downloader::Downloader(QObject *parent, const QString &startingURL, const QString &downloadFolder) : QObject(parent) {
     this->parent = parent;
@@ -48,6 +49,7 @@ void Downloader::Read_Download_Links() {
     downloadLinkData.numPlayers = 0;
     downloadLinkData.fileName = QString();
     downloadLinkData.fileType = QString();
+    downloadLinkData.validForMeleeMode = true;
     downloadLinkData.downloadLink = QString();
     while (!stream.atEnd()) {
         //Read Max Players
@@ -57,6 +59,14 @@ void Downloader::Read_Download_Links() {
             int tmp = 0;
             tmp = line.split("<span class=\"players\">(").last().split(")").first().toInt(&valid);
             if (valid) downloadLinkData.numPlayers = tmp;
+        }
+
+        //Read the categories for Melee Mode
+        if (MELEE_CATEGORY_FILTER) {
+            if (line.contains("<dt>Categories:</dt>")) {
+                QString categoriesLine = line.split("<dt>Categories:</dt>").at(1).split("</dl>").first().toLower();
+                downloadLinkData.validForMeleeMode = categoriesLine.contains("strategy") || categoriesLine.contains("arena");
+            }
         }
 
         //Read File Type
@@ -80,6 +90,7 @@ void Downloader::Read_Download_Links() {
                     downloadLinkData.numPlayers = 0;
                     downloadLinkData.fileName = QString();
                     downloadLinkData.fileType = QString();
+                    downloadLinkData.validForMeleeMode = true;
                     downloadLinkData.downloadLink = QString();
                 }
             }
@@ -153,6 +164,16 @@ void Downloader::Process_Next_Download_Link() {
     assert(!this->downloadLinks->isEmpty());
     qInfo() << "";
     qInfo().noquote() << this->downloadLinks->front().downloadLink;
+    if (MELEE_CATEGORY_FILTER && !this->downloadLinks->front().validForMeleeMode) {
+        qInfo() << "Categories for melee map do not match! Skipping...";
+        this->downloadLinks->pop_front();
+        if (!this->downloadLinks->isEmpty()) {
+            this->Process_Next_Download_Link();
+        } else {
+            if (this->Get_Next_Page()) this->Download_Maps();
+        }
+        return;
+    }
 
     QNetworkReply *reply = this->manager->get(QNetworkRequest(QUrl(this->downloadLinks->front().downloadLink)));
     connect(reply, &QNetworkReply::finished, this, &Downloader::Map_Download_Finished);
