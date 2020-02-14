@@ -155,6 +155,10 @@ bool Downloader::Get_Next_Page() {
     if (!valid) return false;
     this->currentPageURL.remove("&p="+QString::number(page));
     this->currentPageURL += "&p="+QString::number(page+1);
+    qInfo() << "";
+    qInfo() << "********************";
+    qInfo().noquote() << "Page:" << page+1;
+    qInfo() << "********************";
     return true;
 }
 
