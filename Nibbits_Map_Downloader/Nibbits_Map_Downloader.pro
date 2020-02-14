@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         Downloader.cpp \
+        HTML_String_Helper.cpp \
         main.cpp
 
 # Default rules for deployment.
@@ -25,4 +26,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    Downloader.h
+    Downloader.h \
+    HTML_String_Helper.h
