@@ -65,13 +65,27 @@ bool Sort_Folder_Into_Pages(const QString &directory) {
     return true;
 }
 
+bool Is_File_Name_Sortable_Under_Letter(const QString &fileName, const QString &letter) {
+    char l = letter.front().toLower().toLatin1();
+    if (fileName.size() > 3 && fileName.at(0).toLatin1() == '(' && fileName.at(2).toLatin1() == ')') {
+        for (int i = 0; i < fileName.size(); ++i) {
+            char c = fileName.at(i).toLatin1();
+            if (c == ' ') continue;
+            return (c == l);
+        }
+        return false;
+    } else {
+        return fileName.startsWith(letter.toLower());
+    }
+}
+
 bool Is_File_Name_A_Number(QString fileName) {
     bool isNumber = false;
     fileName = fileName.toLower();
     QString(fileName.at(0)).toInt(&isNumber);
     if (isNumber) return true;
-    if (fileName.at(0).toLatin1() == '(' && fileName.size() > 1) {
-        QString(fileName.at(1)).toInt(&isNumber);
+    if (fileName.size() > 3 && fileName.at(0).toLatin1() == '(' && fileName.at(2).toLatin1() == ')') {
+        QString(fileName.at(3)).toInt(&isNumber);
     } else {
         isNumber = false;
     }
@@ -90,7 +104,7 @@ bool Sort_Folder_By_Letter(const QString &directory, const QString &letter) {
         QString fileNameLower = QFileInfo(filePath).fileName().toLower();
         switch (c) {
         default:
-            if (!fileNameLower.startsWith(letter.toLower())) continue;
+            if (!Is_File_Name_Sortable_Under_Letter(fileNameLower, letter)) continue;
             break;
         case '0':
             if (!Is_File_Name_A_Number(fileNameLower)) continue;
