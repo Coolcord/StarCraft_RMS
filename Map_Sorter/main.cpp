@@ -68,14 +68,14 @@ bool Sort_Folder_Into_Pages(const QString &directory) {
 bool Is_File_Name_Sortable_Under_Letter(const QString &fileName, const QString &letter) {
     char l = letter.front().toLower().toLatin1();
     if (fileName.size() > 3 && fileName.at(0).toLatin1() == '(' && fileName.at(2).toLatin1() == ')') {
-        for (int i = 0; i < fileName.size(); ++i) {
+        for (int i = 3; i < fileName.size(); ++i) {
             char c = fileName.at(i).toLatin1();
             if (c == ' ') continue;
             return (c == l);
         }
         return false;
     } else {
-        return fileName.startsWith(letter.toLower());
+        return fileName.front().toLower().toLatin1() == l;
     }
 }
 
