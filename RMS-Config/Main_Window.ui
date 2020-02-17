@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Configure StarCraft RMS</string>
+   <string>StarCraft RMS</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -187,7 +187,7 @@
      <item>
       <widget class="QPushButton" name="btnSaveAndRun">
        <property name="text">
-        <string>Save and Run</string>
+        <string>Select New Maps</string>
        </property>
       </widget>
      </item>

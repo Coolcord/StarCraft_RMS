@@ -6,7 +6,7 @@
 #include <QMessageBox>
 #include <QProcess>
 
-const QString STRING_WINDOW_TITLE = "Configure StarCraft RMS";
+const QString STRING_WINDOW_TITLE = "StarCraft RMS";
 const QString STRING_WINDOW_TITLE_SHORT = "RMS";
 
 Main_Window::Main_Window(QWidget *parent, const QString &applicationLocation)
@@ -54,9 +54,9 @@ void Main_Window::on_btnSaveAndRun_clicked() {
     if (this->instanceRunning) return;
     this->instanceRunning = true;
     if (!this->Save()) { this->Show_Save_Failed_Message(); this->instanceRunning = false; return; }
-    QString programLocation = this->applicationLocation+"/RMS.exe";
+    QString programLocation = this->applicationLocation+"/RMS-CLI.exe";
     if (!QFileInfo(programLocation).exists()) {
-        QMessageBox::critical(this, STRING_WINDOW_TITLE_SHORT, "RMS.exe is not in the program directory!", QMessageBox::Ok);
+        QMessageBox::critical(this, STRING_WINDOW_TITLE_SHORT, "RMS-CLI.exe is not in the program directory!", QMessageBox::Ok);
         this->instanceRunning = false;
         return;
     }
