@@ -112,6 +112,7 @@ int main(int argc, char *argv[]) {
         }
 
         //Remove the player count from the old file name
+        QString oldFileName = fileName;
         QString playerCount = "("+QString::number(numPlayers)+")";
         while (fileName.size() > 3 && fileName.at(0).toLatin1() == '(' && fileName.at(2).toLatin1() == ')') {
             bool isNumber = false;
@@ -122,11 +123,12 @@ int main(int argc, char *argv[]) {
 
         //Rename the map file if necessary
         QString newFileName = playerCount+fileName;
-        if (fileName != newFileName) {
+        if (oldFileName != newFileName) {
             qInfo() << "Adding player count to" << fileName;
             QString newFileName = playerCount+fileName;
             if (!QFile::rename(fileLocation, filePath+"/"+newFileName)) {
-                qCritical() << "Cannot rename" << fileName;
+                qCritical() << "Cannot rename" << oldFileName;
+                qCritical().noquote() << "Player count needs to be" << numPlayers;
                 return 1;
             }
         }
