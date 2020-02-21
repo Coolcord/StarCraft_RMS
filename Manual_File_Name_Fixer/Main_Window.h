@@ -22,6 +22,8 @@ private slots:
 
     void on_btnRefresh_clicked();
 
+    void on_btnShowInExplorer_clicked();
+
 private:
     void Find_Next();
 

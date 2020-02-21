@@ -101,6 +101,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="btnShowInExplorer">
+       <property name="text">
+        <string>Show in Explorer</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="btnRefresh">
        <property name="text">
         <string>Refresh</string>

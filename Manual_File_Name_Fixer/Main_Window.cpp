@@ -2,6 +2,7 @@
 #include "ui_Main_Window.h"
 #include <QFileDialog>
 #include <QDirIterator>
+#include <QProcess>
 
 const static QString STRING_STATUS = "Status: ";
 
@@ -76,4 +77,10 @@ void Main_Window::Find_Next() {
 
 void Main_Window::on_btnRefresh_clicked() {
     this->Find_Next();
+}
+
+void Main_Window::on_btnShowInExplorer_clicked() {
+    QString file = this->ui->lePreviousName->text();
+    QString nativePath = QDir::toNativeSeparators(this->lastFilePath+"/"+file);
+    QProcess::startDetached(QString("explorer /select, \""+nativePath+"\""));
 }
