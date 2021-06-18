@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
 
     //Abort the run if launching StarCraft without the select new maps flag set
     bool abortRun = !settings.Get_Select_New_Maps_When_StarCraft_Launches();
+    qInfo() << QString(argv[1]);
     if (argc == 2 && QString(argv[1]) == "--force") abortRun = false;
     if (abortRun) return 0; //nothing to do
 

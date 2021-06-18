@@ -66,6 +66,7 @@ void Main_Window::on_btnSaveAndRun_clicked() {
     QStringList arguments;
     arguments.append("--force");
     process.setProgram(programLocation);
+    process.setArguments(arguments);
     process.start(process.program(), process.arguments());
     process.waitForFinished(-1);
     bool noErrors = false;
