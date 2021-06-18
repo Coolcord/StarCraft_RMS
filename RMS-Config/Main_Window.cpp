@@ -64,6 +64,7 @@ void Main_Window::on_btnSaveAndRun_clicked() {
     //Set the arguments
     QProcess process;
     QStringList arguments;
+    arguments.append("--force");
     process.setProgram(programLocation);
     process.start(process.program(), process.arguments());
     process.waitForFinished(-1);
@@ -99,6 +100,7 @@ bool Main_Window::Save() {
     this->settingsManager->Set_Directories(directories);
     this->settingsManager->Set_Output_Folder(this->ui->leOutputFolder->text());
     this->settingsManager->Set_Last_Path_For_Get_Next_Map(this->ui->leLastMapPath->text());
+    this->settingsManager->Set_Select_New_Maps_When_StarCraft_Launches(this->ui->cbSelectNewMapsWhenStarCraftLaunches->isChecked());
     this->settingsManager->Set_Get_Next_Map_Instead_Of_Random(this->ui->cbGetNextMapInsteadOfRandom->isChecked());
     this->settingsManager->Set_Check_Player_Count(this->ui->cbCheckPlayerCount->isChecked());
     this->settingsManager->Set_Number_Of_Random_Maps(this->ui->sbNumberOfRandomMaps->value());
@@ -116,6 +118,7 @@ bool Main_Window::Load() {
     }
     this->ui->leOutputFolder->setText(this->settingsManager->Get_Output_Folder());
     this->ui->leLastMapPath->setText(this->settingsManager->Get_Last_Path_For_Get_Next_Map());
+    this->ui->cbSelectNewMapsWhenStarCraftLaunches->setChecked(this->settingsManager->Get_Select_New_Maps_When_StarCraft_Launches());
     this->ui->cbGetNextMapInsteadOfRandom->setChecked(this->settingsManager->Get_Get_Next_Map_Instead_Of_Random());
     this->ui->cbCheckPlayerCount->setChecked(this->settingsManager->Get_Check_Player_Count());
     this->ui->sbNumberOfRandomMaps->setValue(this->settingsManager->Get_Number_Of_Random_Maps());

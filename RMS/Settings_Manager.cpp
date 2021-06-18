@@ -24,6 +24,7 @@ bool Settings_Manager::Save() {
 
     if (!this->configFile->Set_Value("Directories", directoryList)) return false;
     if (!this->configFile->Set_Value("Output_Folder", this->outputFolder)) return false;
+    if (!this->configFile->Set_Value("Select_New_Maps_When_StarCraft_Launches", this->selectNewMapsWhenStarCraftLaunches)) return false;
     if (!this->configFile->Set_Value("Last_Path_For_Get_Next_Map", this->lastPathForGetNextMap)) return false;
     if (!this->configFile->Set_Value("Get_Next_Map_Instead_Of_Random", this->getNextMapInsteadOfRandom)) return false;
     if (!this->configFile->Set_Value("Check_Player_Count", this->checkPlayerCount)) return false;
@@ -39,6 +40,7 @@ bool Settings_Manager::Load() {
     QString directoryList;
     this->configFile->Get_Value("Directories", directoryList);
     this->configFile->Get_Value("Output_Folder", this->outputFolder);
+    this->configFile->Get_Value("Select_New_Maps_When_StarCraft_Launches", this->selectNewMapsWhenStarCraftLaunches);
     this->configFile->Get_Value("Last_Path_For_Get_Next_Map", this->lastPathForGetNextMap);
     this->configFile->Get_Value("Get_Next_Map_Instead_Of_Random", this->getNextMapInsteadOfRandom);
     this->configFile->Get_Value("Check_Player_Count", this->checkPlayerCount);
@@ -53,6 +55,7 @@ void Settings_Manager::Load_Defaults() {
     this->directories = QStringList();
     this->outputFolder = QString();
     this->lastPathForGetNextMap = QString();
+    this->selectNewMapsWhenStarCraftLaunches = true;
     this->getNextMapInsteadOfRandom = false;
     this->checkPlayerCount = true;
     this->numberOfRandomMaps = 0;
@@ -70,6 +73,10 @@ QString Settings_Manager::Get_Output_Folder() {
 
 QString Settings_Manager::Get_Last_Path_For_Get_Next_Map() {
     return this->lastPathForGetNextMap;
+}
+
+bool Settings_Manager::Get_Select_New_Maps_When_StarCraft_Launches() {
+    return this->selectNewMapsWhenStarCraftLaunches;
 }
 
 bool Settings_Manager::Get_Get_Next_Map_Instead_Of_Random() {
@@ -98,6 +105,10 @@ void Settings_Manager::Set_Directories(const QStringList &directories) {
 
 void Settings_Manager::Set_Output_Folder(const QString &outputFolder) {
     this->outputFolder = outputFolder;
+}
+
+void Settings_Manager::Set_Select_New_Maps_When_StarCraft_Launches(bool selectNewMapsWhenStarCraftLaunches) {
+    this->selectNewMapsWhenStarCraftLaunches = selectNewMapsWhenStarCraftLaunches;
 }
 
 void Settings_Manager::Set_Last_Path_For_Get_Next_Map(const QString &lastPathForGetNextMap) {

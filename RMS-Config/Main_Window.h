@@ -27,9 +27,7 @@ private slots:
     void on_btnOutputFolder_clicked();
     void on_cbCheckPlayerCount_toggled(bool checked);
     void on_Main_Window_finished();
-
     void on_btnLastMapPath_clicked();
-
     void on_cbGetNextMapInsteadOfRandom_toggled(bool checked);
 
 private:

@@ -17,6 +17,7 @@ public:
     QStringList Get_Directories();
     QString Get_Output_Folder();
     QString Get_Last_Path_For_Get_Next_Map();
+    bool Get_Select_New_Maps_When_StarCraft_Launches();
     bool Get_Get_Next_Map_Instead_Of_Random();
     bool Get_Check_Player_Count();
     int Get_Number_Of_Random_Maps();
@@ -25,6 +26,7 @@ public:
 
     void Set_Directories(const QStringList &directories);
     void Set_Output_Folder(const QString &outputFolder);
+    void Set_Select_New_Maps_When_StarCraft_Launches(bool selectNewMapsWhenStarCraftLaunches);
     void Set_Last_Path_For_Get_Next_Map(const QString &lastPathForGetNextMap);
     void Set_Get_Next_Map_Instead_Of_Random(bool getNextMapInsteadOfRandom);
     void Set_Check_Player_Count(bool checkPlayerCount);
@@ -39,6 +41,7 @@ private:
     QStringList directories;
     QString outputFolder;
     QString lastPathForGetNextMap;
+    bool selectNewMapsWhenStarCraftLaunches;
     bool getNextMapInsteadOfRandom;
     bool checkPlayerCount;
     int numberOfRandomMaps;

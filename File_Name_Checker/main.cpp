@@ -25,23 +25,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     QTextStream stream(&file);
-
-
-    /*
-    QDirIterator iter(directory, QStringList() << "*.scm" << "*.scx", QDir::Files, QDirIterator::Subdirectories);
-    while (iter.hasNext()) {
-        QString filePath = iter.next();
-        QFileInfo fileInfo(filePath);
-        QString fileName = fileInfo.fileName();
-        while (fileName.size() > 3 && fileName.at(3).toLatin1() == ' ') fileName.remove(3, 1);
-        QString newFilePath = fileInfo.path()+"/"+fileName;
-        if (newFilePath != filePath) {
-            qInfo() << "Renaming" << fileInfo.fileName();
-            QFile::rename(filePath, newFilePath);
-        }
-    }*/
-
-
     int numFiles = 0;
     QDirIterator iter(directory, QStringList() << "*.scm" << "*.scx", QDir::Files, QDirIterator::Subdirectories);
     while (iter.hasNext()) {
